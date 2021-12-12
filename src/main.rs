@@ -4,6 +4,7 @@ use std::path::Path;
 use colored::*;
 
 const SIDE: usize = 10;
+const ROUNDS: usize = 500;
 
 fn main() {
     let mut grid_raw = vec![0; SIDE * SIDE];
@@ -15,13 +16,26 @@ fn main() {
     print_grid(grid, "Grid before any steps");
 
     let mut total_flashes = 0;
-    for round_minus_one in 0..100 {
+    for round_minus_one in 0..ROUNDS {
         let step = round_minus_one + 1;
         total_flashes += execute_round(grid, step);
         
         let mut owned = "After step ".to_owned();
         owned.push_str(&(step).to_string());
-        print_grid_string(grid, owned);
+        // print_grid_string(grid, owned);
+
+        let mut all_zero = true;
+        for y in 0..SIDE {
+            for x in 0..SIDE {
+                if grid[x][y] != 0 {
+                    all_zero = false;
+                }
+            }
+        }
+
+        if all_zero {
+            println!("Everthing zero after step {}", step)
+        }
     }
 
     println!("Total flashes {}", total_flashes);
@@ -72,7 +86,7 @@ fn inc_for_flash(grid: &mut [&mut [u32]], x: usize, y: usize) -> bool {
 }
 
 fn flash(grid: &mut [&mut [u32]], x: usize, y: usize) -> bool {
-    println!("  Flashing for {},{}", x, y);
+    // println!("  Flashing for {},{}", x, y);
     
     set(grid, x, y, 11);
       
@@ -90,7 +104,7 @@ fn flash(grid: &mut [&mut [u32]], x: usize, y: usize) -> bool {
                 }
 
                 if pos_x_to_inc == 2 && pos_y_to_inc == 2 {
-                    println!("    increasing 2,2 because of {},{} to {}", x, y, grid[2][2]);
+                    // println!("    increasing 2,2 because of {},{} to {}", x, y, grid[2][2]);
                 }
             }
         }
@@ -120,8 +134,10 @@ fn print_grid(grid: &mut [&mut [u32]], title: &str) -> () {
                 "x".to_string().color("red") 
                 } else if cell == 11 { 
                     "T".to_string().color("green")  
-                }else if cell == 9 { 
+                } else if cell == 9 { 
                     cell.to_string().color("blue") 
+                } else if cell == 0 { 
+                    cell.to_string().color("cyan") 
                 } else { 
                     cell.to_string().color("white") 
                 };
@@ -149,7 +165,7 @@ fn flash_grid(grid: &mut [&mut [u32]], step: usize) -> bool {
     }
 
     if to_flash.len() == SIDE * SIDE {
-        println!("Everything flashing at step {}.", step);
+        println!("Everything flashing at step {}!.", step);
     }
 
     for pos in to_flash {
@@ -171,17 +187,17 @@ fn execute_round(grid: &mut [&mut [u32]], step: usize) -> i32 {
         }
     }
 
-     print_grid(grid, "After increasing");
+    // print_grid(grid, "After increasing");
 
     // Flashing
     let mut keep_flashing = true;
     while keep_flashing {
         keep_flashing = flash_grid(grid, step);
-        println!("FLASH");
+        // println!("FLASH");
     }
         
 
-    print_grid(grid, "After flashing neighbors");   
+    // print_grid(grid, "After flashing neighbors");   
 
     // Resetting + flash counting
     for y in 0..SIDE {
